@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            ${{ secrets.AWS_REGION }}
+
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
@@ -26,26 +28,22 @@ jobs:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           IMAGE=$REGISTRY/casino-frontend
-          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest -t $IMAGE:v1.0.0 .
           docker push $IMAGE:${{ github.sha }}
           docker push $IMAGE:latest
+          docker push $IMAGE:v1.0.0
 
-      - name: Desplegar en EC2-frontend
-        uses: appleboy/ssh-action@v1
+      - name: Configurar kubectl contra el clúster EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ secrets.AWS_REGION }} \
+            --name ${{ secrets.EKS_CLUSTER }}
+
+      - name: Aplicar manifiestos y actualizar imagen
         env:
-          IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/casino-frontend:latest
-        with:
-          host: ${{ secrets.EC2_FRONTEND_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE
-          script: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-              | docker login --username AWS --password-stdin \
-                ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-            docker pull "$IMAGE"
-            docker rm -f casino-frontend || true
-            docker run -d --name casino-frontend --restart unless-stopped \
-              -p 80:8080 \
-              -e BACKEND_HOST=${{ secrets.BACKEND_HOST_PRIVATE }} \
-              "$IMAGE"
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          kubectl apply -f k8s/
+          kubectl set image deployment/casino-frontend \
+            casino-frontend=$REGISTRY/casino-frontend:${{ github.sha }}
+          kubectl rollout status deployment/casino-frontend
