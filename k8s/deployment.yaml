@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: casino-frontend
-          image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/casino-frontend:latest
+          image: 883811547490.dkr.ecr.us-east-1.amazonaws.com/casino-frontend:latest
           ports:
             - containerPort: 8080
           env:
