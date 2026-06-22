@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: casino-frontend
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: casino-frontend
