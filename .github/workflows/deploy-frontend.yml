@@ -47,3 +47,4 @@ jobs:
           kubectl set image deployment/casino-frontend \
             casino-frontend=$REGISTRY/casino-frontend:${{ github.sha }}
           kubectl rollout status deployment/casino-frontend
+          
