@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: casino-frontend
+spec:
+  selector:
+    matchLabels:
+      app: casino-frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: casino-frontend
+    spec:
+      containers:
+        - name: casino-frontend
+          image: 883811547490.dkr.ecr.us-east-1.amazonaws.com/casino-frontend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BACKEND_HOST
+              value: "casino-backend"
+            - name: BONOS_HOST
+              value: "bonos-service"
+            - name: APUESTAS_HOST
+              value: "apuestas-service"
+            - name: ESTADISTICAS_HOST
+              value: "estadisticas-service"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
