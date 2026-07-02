@@ -44,15 +44,25 @@
           },
           "defaultConfiguration": "production"
         },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "configurations": {
-            "production": { "buildTarget": "casino-frontend:build:production" },
-            "development": { "buildTarget": "casino-frontend:build:development" }
-          },
-          "defaultConfiguration": "development"
-        }
-      }
-    }
-  }
-}
+          "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "configurations": {
+                      "production": { "buildTarget": "casino-frontend:build:production" },
+                      "development": { "buildTarget": "casino-frontend:build:development" }
+                    },
+                    "defaultConfiguration": "development"
+                  },
+                  "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                      "polyfills": ["zone.js", "zone.js/testing"],
+                      "tsConfig": "tsconfig.spec.json",
+                      "assets": [],
+                      "styles": ["src/styles.css"],
+                      "scripts": []
+                    }
+                  }
+                }
+              }
+            }
+          }
