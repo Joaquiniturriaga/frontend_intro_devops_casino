@@ -253,3 +253,6 @@ export class BlackjackComponent implements OnDestroy {
     gsap.killTweensOf(this.dealCards?.map(r => r.nativeElement) ?? []);
   }
 }
+
+
+//a
