@@ -237,6 +237,9 @@ export class BlackjackComponent implements OnDestroy {
     this.prevCardCount = 0;
   }
 
+
+  //Esto
+
   valorMano(cartas: Carta[]): number {
     let total = 0, ases = 0;
     for (const c of cartas) {
